@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-ce
+  namespace: gitlab-ce
+  labels:
+    app.kubernetes.io/name: gitlab-ce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gitlab-ce
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gitlab-ce
+    spec:
+      containers:
+        - name: gitlab-ce
+          image: gitlab/gitlab-ce:17.5.2-ce.0
+          ports:
+            - name: http
+              containerPort: 80
+            - name: ssh
+              containerPort: 22
