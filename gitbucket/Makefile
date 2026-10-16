@@ -1,18 +1,21 @@
 GITBUCKET_VERSION ?= 4.48.0
 
-.PHONY: all deploy destroy
+.PHONY: help all deploy destroy
 
-all: deploy
+help: ## Display available targets
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_-]+:.*## / {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-deploy:
+all: deploy ## Deploy GitBucket to Kubernetes
+
+deploy: ## Apply GitBucket Kubernetes resources
 	kubectl apply -f namespace.yaml
 	kubectl apply -f deployment.yaml
 	kubectl apply -f service.yaml
 
-update-version:
+update-version: ## Set the GitBucket image to GITBUCKET_VERSION
 	sed -i "s|gitbucket/gitbucket:.*|gitbucket/gitbucket:$(GITBUCKET_VERSION)|" deployment.yaml
 
-destroy:
+destroy: ## Delete GitBucket resources after confirmation
 	@read -p "Enter the name of the service to destroy: " confirm; \
 	if [ "$$confirm" = "gitbucket" ]; then \
 		kubectl delete -f service.yaml; \
