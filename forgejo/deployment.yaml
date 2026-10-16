@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: forgejo
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: forgejo
@@ -23,3 +25,10 @@ spec:
               containerPort: 3000
             - name: ssh
               containerPort: 22
+          volumeMounts:
+            - name: forgejo-data
+              mountPath: /data
+      volumes:
+        - name: forgejo-data
+          persistentVolumeClaim:
+            claimName: forgejo-data

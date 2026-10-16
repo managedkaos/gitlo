@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: gitlab-ce
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: gitlab-ce
@@ -15,6 +17,7 @@ spec:
       labels:
         app.kubernetes.io/name: gitlab-ce
     spec:
+      terminationGracePeriodSeconds: 120
       containers:
         - name: gitlab-ce
           image: gitlab/gitlab-ce:17.5.2-ce.0
@@ -27,3 +30,25 @@ spec:
               containerPort: 80
             - name: ssh
               containerPort: 22
+          volumeMounts:
+            - name: gitlab-ce-config
+              mountPath: /etc/gitlab
+            - name: gitlab-ce-data
+              mountPath: /var/opt/gitlab
+            - name: gitlab-ce-logs
+              mountPath: /var/log/gitlab
+            - name: gitlab-ce-shm
+              mountPath: /dev/shm
+      volumes:
+        - name: gitlab-ce-config
+          persistentVolumeClaim:
+            claimName: gitlab-ce-config
+        - name: gitlab-ce-data
+          persistentVolumeClaim:
+            claimName: gitlab-ce-data
+        - name: gitlab-ce-logs
+          emptyDir: {}
+        - name: gitlab-ce-shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
