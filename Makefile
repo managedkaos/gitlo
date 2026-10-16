@@ -1,6 +1,6 @@
-.PHONY: all gitea forgejo gitlabce
+.PHONY: all gitea forgejo gitlabce gitbucket
 
-all: gitea forgejo gitlabce
+all: gitea forgejo gitlabce gitbucket
 
 gitea:
 	$(MAKE) -C gitea deploy
@@ -10,3 +10,6 @@ forgejo:
 
 gitlabce:
 	$(MAKE) -C gitlab-ce deploy
+
+gitbucket:
+	$(MAKE) -C gitbucket deploy
