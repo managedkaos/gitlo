@@ -10,7 +10,7 @@ spec:
     app.kubernetes.io/name: forgejo
   ports:
     - name: http
-      port: 3000
+      port: 80
       targetPort: http
     - name: ssh
       port: 22

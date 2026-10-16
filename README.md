@@ -4,8 +4,7 @@ Kubernetes manifests for running git servers locally.
 
 ## forgejo
 
-- Failed to load out of the box.
-- Abandoning.
+- Initally abandoned Forgejo due to the service not starting. Its working now.
 
 ## gitea
 
