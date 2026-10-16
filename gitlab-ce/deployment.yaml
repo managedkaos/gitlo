@@ -18,6 +18,10 @@ spec:
       containers:
         - name: gitlab-ce
           image: gitlab/gitlab-ce:17.5.2-ce.0
+          env:
+            - name: GITLAB_OMNIBUS_CONFIG
+              value: |
+                external_url 'http://gitlab-ce.gitlab-ce.svc.cluster.local'
           ports:
             - name: http
               containerPort: 80
