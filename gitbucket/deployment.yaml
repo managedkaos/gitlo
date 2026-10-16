@@ -15,11 +15,33 @@ spec:
       labels:
         app.kubernetes.io/name: gitbucket
     spec:
+      initContainers:
+        - name: download-gitbucket
+          image: public.ecr.aws/docker/library/amazoncorretto:21
+          command:
+            - sh
+            - -c
+            - |
+              curl -L -o /gitbucket/gitbucket.war \
+                https://github.com/gitbucket/gitbucket/releases/download/4.48.0/gitbucket.war
+          volumeMounts:
+            - name: gitbucket-war
+              mountPath: /gitbucket
       containers:
         - name: gitbucket
-          image: gitbucket/gitbucket:4.48.0
+          image: public.ecr.aws/docker/library/amazoncorretto:21
+          command:
+            - java
+            - -jar
+            - /gitbucket/gitbucket.war
           ports:
             - name: http
               containerPort: 8080
             - name: ssh
               containerPort: 29418
+          volumeMounts:
+            - name: gitbucket-war
+              mountPath: /gitbucket
+      volumes:
+        - name: gitbucket-war
+          emptyDir: {}
