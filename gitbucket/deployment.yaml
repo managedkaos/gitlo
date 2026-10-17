@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: gitbucket
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: gitbucket
@@ -34,6 +36,9 @@ spec:
             - java
             - -jar
             - /gitbucket/gitbucket.war
+          env:
+            - name: GITBUCKET_HOME
+              value: /gitbucket-data
           ports:
             - name: http
               containerPort: 8080
@@ -42,6 +47,11 @@ spec:
           volumeMounts:
             - name: gitbucket-war
               mountPath: /gitbucket
+            - name: gitbucket-data
+              mountPath: /gitbucket-data
       volumes:
         - name: gitbucket-war
           emptyDir: {}
+        - name: gitbucket-data
+          persistentVolumeClaim:
+            claimName: gitbucket-data

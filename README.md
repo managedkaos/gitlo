@@ -2,6 +2,39 @@
 
 Kubernetes manifests for running git servers locally.
 
+## Persistence
+
+Each service stores its data on a PersistentVolumeClaim (PVC) backed by the default `local-path` StorageClass. Data survives pod restarts and `make clean` cycles. Only `make nuke` wipes it.
+
+| Service    | PVC(s)                              | Mount path(s)                              | Size        |
+|------------|-------------------------------------|--------------------------------------------|-------------|
+| gitea      | `gitea-data`                        | `/data`                                    | 5 Gi        |
+| forgejo    | `forgejo-data`                      | `/data`                                    | 5 Gi        |
+| gitbucket  | `gitbucket-data`                    | `/gitbucket-data` (`GITBUCKET_HOME`)       | 5 Gi        |
+| gitlab-ce  | `gitlab-ce-config`, `gitlab-ce-data`| `/etc/gitlab`, `/var/opt/gitlab`           | 1 Gi, 20 Gi |
+
+GitLab logs (`/var/log/gitlab`) and shared memory (`/dev/shm`, 256 Mi) use ephemeral `emptyDir` volumes and are not persisted.
+
+### Workflow
+
+```
+make deploy   # creates namespace + PVC + Deployment + Service (PVC re-used on subsequent runs)
+make clean    # deletes Service and Deployment only; namespace and PVC are kept, data is intact
+make nuke     # prompts for the service name, then deletes everything including the PVC and namespace
+```
+
+`make deploy` is idempotent: running it after `make clean` re-attaches the existing PVC so all data is preserved (no wizard, no re-initialisation).
+
+> **Note:** Data lives on the single OrbStack node. Resetting or recreating the OrbStack cluster loses all data. Any backup requires separate tooling.
+
+### GitLab initial root password
+
+The initial root password is written to `/etc/gitlab/initial_root_password` on first boot. Because `/etc/gitlab` is now on the persistent `gitlab-ce-config` PVC, that file survives `make clean` + `make deploy` until GitLab deletes it (typically 24 hours after first boot).
+
+### GitLab `external_url` precedence
+
+`GITLAB_OMNIBUS_CONFIG` is evaluated on every start and its `external_url` value is written into `gitlab.rb` **only if the file does not already set it**. A hand-edited `gitlab.rb` on the persistent `/etc/gitlab` volume therefore takes precedence after the first `gitlab-ctl reconfigure`. The `GITLAB_OMNIBUS_CONFIG` value in `deployment.yaml` acts as the bootstrap default.
+
 ## forgejo
 
 - Initally abandoned Forgejo due to the service not starting. Its working now.
