@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: gitea
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: gitea
@@ -23,3 +25,10 @@ spec:
               containerPort: 3000
             - name: ssh
               containerPort: 22
+          volumeMounts:
+            - name: gitea-data
+              mountPath: /data
+      volumes:
+        - name: gitea-data
+          persistentVolumeClaim:
+            claimName: gitea-data
