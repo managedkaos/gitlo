@@ -2,6 +2,66 @@
 
 Kubernetes manifests for running git servers locally.
 
+## Testing setup
+
+Use Python 3 (standard library only) and `kubectl` for the automation:
+
+```bash
+make init             # prompt for username, password, email, public key and GitLab token
+make all              # deploy services; initialize .env first if it is missing
+make setup-testing    # upload your public key and create testing-123 on every service
+```
+
+`make init` writes an ignored `.env` with permissions `0600`. The username must
+contain only lowercase letters; use the same value for account names and display
+names during manual signup. The default public key is `~/.ssh/id_ed25519.pub`.
+Only the public key is read. Settings use JSON string quoting as shown in
+[.env.example](.env.example); `.env` is read as data, never executed by a shell
+or included by Make. Running `make init` again preserves saved settings when you
+leave a prompt blank. It does not change existing accounts or passwords.
+
+For existing accounts, enter their current credentials. If credentials differ
+between services, set the per-service overrides shown in `.env.example`.
+Create a personal access token with `api` scope from **your GitLab user account**
+and enter it at the hidden token prompt (or set `GITLAB_TOKEN` in `.env`). GitLab
+API calls use this token; the other services use username/password authentication.
+Setup verifies the authenticated username before creating anything.
+
+Accounts, initial web setup, and GitLab user approval remain manual. Gitea and
+Forgejo offer CLI user creation rather than a shared initial-user environment
+variable. GitBucket retains its own root bootstrap flow. For a fresh GitLab
+database, top-level `make gitlabce` (also part of `make all`) creates a Kubernetes
+Secret and supplies `GITLAB_ROOT_PASSWORD`, defaulting to `GITLO_PASSWORD`. You
+can set a separate `GITLAB_ROOT_PASSWORD` in `.env`. GitLab's initial administrator
+is still named `root`; create your personal account after logging in. The setting
+does not reset passwords in an existing database. Deploying directly from the
+GitLab subdirectory skips Secret provisioning and uses the existing Secret, if any.
+
+Run testing setup after finishing web configuration and waiting for each service
+to accept API requests. It creates a private, empty `testing-123` repository in
+your personal namespace and skips existing repositories and matching SSH keys.
+It leaves existing repository contents and settings intact. GitBucket 4.48 lacks
+an SSH-key REST endpoint, so its upload uses a cookie-authenticated settings form
+and verifies the result through the user's public key listing.
+
+```bash
+make setup-testing SERVICE=gitea  # also forgejo, gitbucket, or gitlab
+```
+
+Override service URLs in `.env` if OrbStack service DNS is unavailable from your
+host. For example, port-forward a service and set its URL to the local HTTP port.
+Use trusted local URLs for these local test instances. On failure, setup reports
+the service, continues with the others, and exits unsuccessfully; fix the reported
+problem and rerun it. Credentials and a GitLab token are required before running
+setup for all services. Uploading a key does not enable GitBucket's SSH server;
+enable it in GitBucket's system settings before testing SSH clone/push.
+
+Root deployment targets reuse `.env` without prompting on subsequent runs. Direct
+subdirectory deployment targets keep their existing behavior. Initialization and
+deployment do not automatically run testing setup.
+
+Offline automation checks: `python3 -m unittest discover -s scripts -p 'test_*.py'`.
+
 ## Persistence
 
 Each service stores its data on a PersistentVolumeClaim (PVC) backed by the default `local-path` StorageClass. Data survives pod restarts and `make clean` cycles. Only `make nuke` wipes it.
