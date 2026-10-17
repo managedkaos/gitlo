@@ -17,6 +17,8 @@ spec:
       labels:
         app.kubernetes.io/name: gitbucket
     spec:
+      # Prevent the gitbucket Service from injecting a TCP URL as GITBUCKET_PORT
+      enableServiceLinks: false
       initContainers:
         - name: download-gitbucket
           image: public.ecr.aws/docker/library/amazoncorretto:21
