@@ -1,10 +1,20 @@
-.PHONY: help init _init configure-gitlab setup-testing all gitea forgejo gitlabce gitbucket
+.PHONY: help pods pvc urls init _init configure-gitlab setup-testing all gitea forgejo gitlabce gitbucket
 
 PYTHON ?= python3
 SERVICE ?= all
+NAMESPACE ?=
 
 help: ## Display available targets
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_-]+:.*## / {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+
+pods: ## List Git hosting pod names and namespaces
+	@bash scripts/pods.sh "$(NAMESPACE)"
+
+pvc: ## List Git hosting PVC names and bound volumes
+	@bash scripts/pvc.sh "$(NAMESPACE)"
+
+urls: ## List Git hosting service DNS URLs and ports
+	@$(PYTHON) scripts/service_urls.py --namespace "$(NAMESPACE)"
 
 init: ## Save local testing credentials and SSH key settings
 	@$(PYTHON) scripts/initialize.py init

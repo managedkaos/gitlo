@@ -2,6 +2,26 @@
 
 Kubernetes manifests for running git servers locally.
 
+## CLI listings
+
+```bash
+make pods                       # Git hosting pod namespaces and names
+make urls                       # service DNS endpoints, including SSH ports
+make pvc                        # PVC names and bound volumes for Git services
+make pods NAMESPACE=gitbucket    # restrict a listing to one namespace
+make urls NAMESPACE=gitbucket
+make pvc NAMESPACE=gitbucket
+```
+
+All three commands use the current `kubectl` context and display only the `forgejo`,
+`gitbucket`, `gitea`, and `gitlab-ce` namespaces. `NAMESPACE` further restricts
+that selection. They do not require `.env`. Each listing makes one Kubernetes API query. `make urls`
+uses Service ports rather than container ports and labels HTTP, HTTPS, SSH, and
+other TCP/UDP endpoints. These are cluster DNS addresses; host access requires
+OrbStack DNS integration or another route into the cluster. The listing does not
+check application readiness or whether SSH is enabled, and does not show ingress
+or externally advertised URLs.
+
 ## Testing setup
 
 Use Python 3 (standard library only) and `kubectl` for the automation:
