@@ -1,8 +1,11 @@
 .PHONY: all deploy clean nuke
 
-all: deploy
+help: ## Display available targets
+	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_-]+:.*## / {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-deploy:
+all: deploy ## Deploy Forgejo to Kubernetes
+
+deploy: ## Apply Forgejo Kubernetes resources
 	kubectl apply -f namespace.yaml
 	kubectl apply -f pvc.yaml
 	kubectl apply -f deployment.yaml
