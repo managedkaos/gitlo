@@ -1,4 +1,4 @@
-.PHONY: all deploy clean nuke
+.PHONY: help all deploy clean nuke
 
 help: ## Display available targets
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_-]+:.*## / {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -11,11 +11,11 @@ deploy: ## Apply GitLab CE Kubernetes resources
 	kubectl apply -f deployment.yaml
 	kubectl apply -f service.yaml
 
-clean:
+clean: ## Remove GitLab CE deployment and service
 	kubectl delete --ignore-not-found -f service.yaml
 	kubectl delete --ignore-not-found -f deployment.yaml
 
-nuke:
+nuke: ## Delete all GitLab CE resources and data
 	@read -p "Enter the name of the service to delete (all data will be deleted): " confirm; \
 	if [ "$$confirm" = "gitlab-ce" ]; then \
 		kubectl delete --ignore-not-found --cascade=foreground -f service.yaml; \

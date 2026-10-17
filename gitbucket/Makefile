@@ -1,6 +1,6 @@
 GITBUCKET_VERSION ?= 4.48.0
 
-.PHONY: all deploy clean nuke
+.PHONY: help all deploy clean nuke
 
 help: ## Display available targets
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_-]+:.*## / {printf "\033[36m%-28s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -16,11 +16,11 @@ deploy: ## Apply GitBucket Kubernetes resources
 update-version: ## Set the GitBucket image to GITBUCKET_VERSION
 	sed -i "s|gitbucket/gitbucket:.*|gitbucket/gitbucket:$(GITBUCKET_VERSION)|" deployment.yaml
 
-clean:
+clean: ## Remove GitBucket deployment and service
 	kubectl delete --ignore-not-found -f service.yaml
 	kubectl delete --ignore-not-found -f deployment.yaml
 
-nuke:
+nuke: ## Delete all GitBucket resources and data
 	@read -p "Enter the name of the service to delete (all data will be deleted): " confirm; \
 	if [ "$$confirm" = "gitbucket" ]; then \
 		kubectl delete --ignore-not-found --cascade=foreground -f service.yaml; \
