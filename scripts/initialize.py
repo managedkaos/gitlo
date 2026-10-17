@@ -59,7 +59,7 @@ def save(path, values):
 
 
 def initialize(path):
-    values = load(ROOT / ".env.example")
+    values = load(ROOT / "env_example.txt")
     if path.exists():
         values.update(load(path))
     for key, label in (("GITLO_USERNAME", "Username (lowercase letters)"),
@@ -198,9 +198,27 @@ def seed(service, values, key):
     print(f"{service}: SSH key present; {username}/testing-123 ready")
 
 
+def configure_gitlab(url):
+    parsed = urlsplit(url)
+    if (parsed.scheme not in ("http", "https") or not parsed.hostname
+            or parsed.username is not None or parsed.password is not None
+            or parsed.query or parsed.fragment or any(c.isspace() for c in url)):
+        raise ValueError("GITLAB_URL must be an HTTP(S) URL without credentials, query or fragment")
+    path = ROOT / "gitlab-ce/deployment.yaml"
+    original = path.read_text()
+    updated, count = re.subn(
+        r"(?m)^(            - name: GITLAB_URL\n              value: )[^\n]*$",
+        lambda match: match[1] + json.dumps(url), original)
+    if count != 1:
+        raise ValueError("Expected exactly one GITLAB_URL value in the GitLab deployment")
+    if updated != original:
+        path.write_text(updated)
+    print("GitLab deployment URL synchronized from .env")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("init", "ensure", "setup", "gitlab-secret"))
+    parser.add_argument("command", choices=("init", "ensure", "setup", "gitlab-secret", "gitlab-config"))
     parser.add_argument("--service", choices=("all",) + SERVICES, default="all")
     args = parser.parse_args()
     path = ROOT / ".env"
@@ -212,6 +230,9 @@ def main():
     values = load(path)
     validate(values)
     if args.command == "ensure":
+        return
+    if args.command == "gitlab-config":
+        configure_gitlab(values["GITLAB_URL"])
         return
     if args.command == "gitlab-secret":
         subprocess.run(["kubectl", "apply", "-f", str(ROOT / "gitlab-ce/namespace.yaml")], check=True)
