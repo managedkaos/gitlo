@@ -150,7 +150,9 @@ activemq-data/
 *.sage.py
 
 # Environments
+# Local gitlo credentials (keep .env.example versioned)
 .env
+.gitlo-env-*
 .envrc
 .venv
 env/

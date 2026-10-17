@@ -1,0 +1,24 @@
+# Run make init to write .env with permissions 0600
+# Values use JSON string quoting; this file is read as data, never sourced
+GITLO_USERNAME="tester"
+GITLO_PASSWORD=""
+GITLO_EMAIL="tester@example.com"
+SSH_PUBLIC_KEY="~/.ssh/id_ed25519.pub"
+# Use a personal access token with api scope from your existing GitLab user
+GITLAB_TOKEN=""
+# Optional separate initial root password; defaults to GITLO_PASSWORD
+# Applies only when GitLab initializes a fresh database
+# GITLAB_ROOT_PASSWORD=""
+# Override these if your host does not resolve OrbStack service DNS
+GITEA_URL="http://gitea.gitea.svc.cluster.local"
+FORGEJO_URL="http://forgejo.forgejo.svc.cluster.local"
+GITBUCKET_URL="http://gitbucket.gitbucket.svc.cluster.local"
+GITLAB_URL="http://gitlab-ce.gitlab-ce.svc.cluster.local"
+# Optional per-service credentials override the shared username/password
+# GITEA_USERNAME="tester"
+# GITEA_PASSWORD=""
+# FORGEJO_USERNAME="tester"
+# FORGEJO_PASSWORD=""
+# GITBUCKET_USERNAME="tester"
+# GITBUCKET_PASSWORD=""
+# GITLAB_USERNAME="tester"
