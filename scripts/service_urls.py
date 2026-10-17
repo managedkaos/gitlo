@@ -37,12 +37,14 @@ def main():
                             stdout=subprocess.PIPE, text=True)
     if result.returncode:
         return result.returncode
-    table = [("NAMESPACE", "SERVICE", "PORT", "SERVICE DNS URL"), *rows(json.loads(result.stdout)["items"])]
+
+    print(f"\nService endpoints in namespace: '{args.namespace or 'all'}'")
+    print("-" * 80)
+    table = [("NAMESPACE", "SERVICE", "PORT", "URL"), *rows(json.loads(result.stdout)["items"])]
     widths = [max(len(row[index]) for row in table) for index in range(3)]
     for row in table:
         print("  ".join(value.ljust(width) for value, width in zip(row[:3], widths)) + "  " + row[3])
-    if len(table) == 1:
-        print("No service ports found")
+
     return 0
 
 

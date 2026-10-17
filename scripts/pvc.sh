@@ -5,6 +5,11 @@ scope=(--all-namespaces)
 if [[ -n "${1:-}" ]]; then
     scope=(--namespace "$1")
 fi
+
+echo
+echo "Persistent Volume Claims in namespace: '${1:-all}'"
+echo "----------------------------------------------------------"
+
 # Include namespace for filtering, then remove it from the displayed report
 kubectl get pvc "${scope[@]}" \
     -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name,VOLUME:.spec.volumeName |

@@ -6,6 +6,11 @@ scope=(--all-namespaces)
 if [[ -n "${1:-}" ]]; then
     scope=(--namespace "$1")
 fi
+
+echo
+echo "Pods in namespace: '${1:-all}'"
+echo "----------------------------------------------------------"
+
 kubectl get pods "${scope[@]}" \
     -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name |
     awk 'NR == 1 || $1 ~ /^(forgejo|gitbucket|gitea|gitlab-ce)$/'
